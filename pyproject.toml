@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.package-dir]
+"" = "py"
+
+[project]
+name = "desioops"
+description = "DESI Online Observability Prediction System"
+authors = [{name = "Dylan Green", email = "dylangreen@lbl.gov"}]
+license = "BSD 3-Clause"
+dependencies = ["numpy",
+                "astropy"]
+readme = "README.md"
+dynamic = ["version"]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+]
+
+[tool.setuptools.dynamic]
+version = {attr = "adaptic.__version__"}
+
+
+[tool.coverage.run]
+source = ["."]
+
+[tool.coverage.report]
+omit = ["src/desioops/tests/*"]
