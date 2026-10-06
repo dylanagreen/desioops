@@ -1,5 +1,9 @@
 import numpy as np
 
+from astropy.coordinates import SkyCoord, EarthLocation, solar_system_ephemeris, get_body_barycentric, get_body, AltAz
+from astropy.time import Time
+from astropy import units as u
+
 # Dictionary of common fisheye projections.
 # We don't a priori assume any projection for this camera, but instead fit it from
 # some found "on camera" positions of objects and their "true" positions
@@ -42,6 +46,54 @@ def altaz_to_xy(alt, az, proj, f, dtheta):
     y = -np.cos(np.deg2rad(az_corrected)) * r
 
     return x, y
+
+def radec_to_altaz(ra, dec, time):
+    """Convert a set of (ra, dec) coordinates to (alt, az) coordinates,
+    element-wise.
+
+    Parameters
+    ----------
+    ra : array_like
+        The right ascension coordinates.
+    dec : array_like
+        The declination coordinates.
+    time : astropy.time.core.aptime.Time
+        The time and date to use in the conversion.
+
+    Returns
+    -------
+    alt : array_like
+        The altitude coordinates. This is a scalar if ra and dec are scalars.
+    az : array_like
+        The azimuth coordinates. This is a scalar if ra and dec are scalars.
+
+    See Also
+    --------
+    timestring_to_obj : Convert a date and filename to an astropy.Time object.
+
+    Notes
+    -----
+    The `time` parameter is used for the mapping from altitude and azimuth to
+    right ascension and declination. Astropy is used to perform this conversion.
+    """
+    if not isinstance(time, Time):
+        time = Time(time)
+
+    # This is the latitude/longitude of the camera
+    camera = (31.959417 * u.deg, -111.598583 * u.deg)
+
+    cameraearth = EarthLocation(lat=camera[0], lon=camera[1],
+                                height=2120 * u.meter)
+
+    # Creates the SkyCoord object
+    radeccoord = SkyCoord(ra=ra, dec=dec, unit="deg", obstime=time,
+                          location=cameraearth, frame="icrs",
+                          temperature=5 * u.deg_C, pressure=78318 * u.Pa)
+
+    # Transforms
+    altazcoord = radeccoord.transform_to("altaz")
+
+    return (altazcoord.alt.degree, altazcoord.az.degree)
 
 
 def get_com_patch(im, x_guess, y_guess, width, thresh=False):
