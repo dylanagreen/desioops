@@ -11,7 +11,8 @@ description = "DESI Online Observability Prediction System"
 authors = [{name = "Dylan Green", email = "dylangreen@lbl.gov"}]
 license = "BSD 3-Clause"
 dependencies = ["numpy",
-                "astropy"]
+                "astropy",
+                "requests"]
 readme = "README.md"
 dynamic = ["version"]
 
